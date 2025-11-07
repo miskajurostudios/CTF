@@ -1,12 +1,12 @@
 {
   "flag1": {
-    "name": "flaga 1",
-    "hint": "rada 1",
-    "flag": "MJS_FLAG{jo-bude-to-takhle-plain-text-idc}"
+    "name": "[01] Rookie Phising Site",
+    "hint": "It's hidden somewhere in plain sight... literally.",
+    "flag": "MJS_Flag{y0uhAv-eBeenP-NW.lol}"
   },
   "flag2": {
-    "name": "flaga 2",
-    "hint": "tady dalsi hint",
-    "flag": "MJS_FLAG{druhy-flag}"
+    "name": "Placeholder",
+    "hint": "Placeholder hint",
+    "flag": "MJS_FLAG{0}"
   }
 }
