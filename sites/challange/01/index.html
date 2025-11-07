@@ -1,12 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- [CTF] Settings & Imports, just Ignore. -->
+    <script defer src="https://miskajurostudios.github.io/CTF/sites/Functionality/THIS-IS-NOT-PART-OF-CTF-PLEASE-IGNORE.js"></script>
+    <!-- [CTF] END -->
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phising Site CTF-01 | CTF MiskaJuroStudios</title>
+    <title>Y. It's what's happening / Y</title>
+    <link rel="icon" type="image/png" href="Y.png">
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+    
+        .Y-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 400px;
+            background-color: black;
+            margin-left: 20%;
+        }
+    
+        .Form-container {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 400px;
+            background-color: black;
+            margin-right: 35%;
+        }
+        .Form-Input {
+            margin-bottom: 10px;
+            width: 320px;
+            height: 30px;
+            border-radius: 15px;
+            background-color: black;
+            color: white;
+            border-color: rgb(182, 182, 182);
+            padding-left: 10px;
+        }
+        .Form-Input:focus {
+            outline: none;
+        }
+
+        button {
+            width: 335px;
+            height: 30px;
+            border-radius: 15px;
+            background-color: black;
+            color: white;
+            border-color: rgb(182, 182, 182);
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .Y-image {
+            max-width: 400px;
+        }
+    </style>
 </head>
 <body>
-    <script defer scr="https://miskajurostudios.github.io/CTF/sites/Functionality/THIS-IS-NOT-PART-OF-CTF-PLEASE-IGNORE.js"></script>
-    <h1>WIP</h1>
+    <div class="Y-container">
+        <img class="Y-image" src="Y.png">
+    </div>
+    <div class="Form-container">
+        <h1 class="typewriting">Explore </h1>
+        <script defer src="typewriter.js"></script>
+        <input class="Form-Input" id="inp-1" placeholder="Your @ or #">
+        <input class="Form-Input" id="inp-2" placeholder="Your pass" type="password">
+        <button id="enter-button">Sign In</button>
+        <script>
+            document.getElementById("enter-button").addEventListener
+            ("click", function() {
+                const inp1 = document.getElementById("inp-1").value;
+                const inp2 = document.getElementById("inp-2").value;
+                const inp3 = "MJS_Flag{y0uhAv-eBeenP-NW.lol}";
+                alert(`Hahaha! You have been pwned! Your password is ${inp2}!`);
+            });
+        </script>
+    </div>
 </body>
 </html>
