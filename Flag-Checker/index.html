@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flag Checker</title>
+<style>
+  :root{
+    --bg:#000;
+    --panel:#070707;
+    --muted:#9da3a8;
+    --accent:#19c973;
+    --danger:#ff4c4c;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:#e6eef0}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{width:100%;max-width:720px;background:linear-gradient(#030303,#080808);border:1px solid rgba(255,255,255,0.03);padding:28px;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.7)}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  h1{margin:0;font-size:18px}
+  .sub{color:var(--muted);font-size:13px;margin-top:6px}
+  .scorebox{display:flex;gap:10px;align-items:center}
+  .pill{background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:999px;font-weight:700;color:var(--muted);font-size:13px}
+  .pill .val{color:#fff;margin-left:6px;font-weight:800}
+  main{display:flex;flex-direction:column;align-items:center;gap:14px}
+  form{width:100%;display:flex;gap:10px;align-items:center}
+  input[type="text"]{flex:1;padding:14px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:#020202;color:#e9f7ef;font-size:16px;outline:none;transition:box-shadow .18s, border-color .18s}
+  button{padding:12px 14px;border-radius:10px;border:0;background:#111;font-weight:700;color:var(--muted);cursor:pointer}
+  button.primary{background:var(--accent);color:#00180f}
+  button.link{background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
+  .hint{color:var(--muted);font-size:13px;text-align:center}
+  .input-ok{box-shadow:0 10px 30px rgba(25,201,115,0.06);border-color:rgba(25,201,115,0.18);background:linear-gradient(180deg, rgba(25,201,115,0.02), rgba(25,201,115,0.01))}
+  .input-bad{box-shadow:0 10px 30px rgba(255,76,76,0.06);border-color:rgba(255,76,76,0.18);background:linear-gradient(180deg, rgba(255,76,76,0.01), rgba(255,76,76,0.005))}
+  .list{width:100%;margin-top:12px;border-top:1px dashed rgba(255,255,255,0.03);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+  .row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;background:rgba(140, 4, 4, 0.322);font-size:14px}
+  .row.done{background:linear-gradient(90deg, rgba(0, 140, 31, 0.559), rgba(25, 234, 77, 0.032));border:1px solid rgba(25,201,115,0.06)}
+  .row small{color:var(--muted)}
+  pre{background:#030303;padding:8px;border-radius:6px;font-size:12px;color:#cfe9d9}
+  footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+  @media (max-width:520px){
+    .card{padding:18px}
+    input[type="text"]{font-size:14px;padding:12px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main">
+      <header>
+        <div>
+          <h1>Flag Checker</h1>
+          <div class="sub">Enter flag you have located here, solving flags will add you points. <strong>NOTE: You can cheat, but that would defeat the purpuse</strong></div>
+        </div>
+        <div class="scorebox">
+          <div class="pill">Solved: <span id="solved-count" class="val">0</span></div>
+          <div class="pill">Points: <span id="points" class="val">0</span></div>
+        </div>
+      </header>
+
+      <main>
+        <form id="flag-form" onsubmit="return false;">
+          <input id="flag-input" type="text" placeholder="FLAG{...}" autocomplete="off" spellcheck="false" />
+          <button id="check-btn" class="primary">Check</button>
+          <button id="reset-btn" class="link" title="Reset progress">Reset</button>
+        </form>
+
+        <div id="message" class="hint">Načítám flags.json...</div>
+
+        <div class="list" id="ch-list" aria-live="polite"></div>
+      </main>
+    </div>
+  </div>
+
+<script>
+const KEY_DONE = 'simple_ctf_done_v2';
+const KEY_SCORE = 'simple_ctf_score_v2';
+const FLAGS_JSON = 'https://raw.githubusercontent.com/miskajurostudios/CTF/refs/heads/main/Flag-Checker/.flags/flags.json'; // musí být ve stejném adresáři jako index.html
+
+const input = document.getElementById('flag-input');
+const checkBtn = document.getElementById('check-btn');
+const resetBtn = document.getElementById('reset-btn');
+const solvedCountEl = document.getElementById('solved-count');
+const pointsEl = document.getElementById('points');
+const chList = document.getElementById('ch-list');
+const message = document.getElementById('message');
+
+let CHALLENGES = [];
+let done = new Set(JSON.parse(localStorage.getItem(KEY_DONE) || '[]'));
+let score = Number(localStorage.getItem(KEY_SCORE) || 0);
+
+async function sha256hex(str){
+  const enc = new TextEncoder();
+  const data = enc.encode(str);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  const bytes = new Uint8Array(buf);
+  let hex = '';
+  for (let b of bytes) hex += b.toString(16).padStart(2,'0');
+  return hex;
+}
+
+function persist(){
+  localStorage.setItem(KEY_DONE, JSON.stringify(Array.from(done)));
+  localStorage.setItem(KEY_SCORE, String(score));
+  renderHeader();
+}
+
+function renderHeader(){
+  solvedCountEl.textContent = done.size;
+  pointsEl.textContent = score;
+}
+
+function renderList(){
+  chList.innerHTML = '';
+  for (const ch of CHALLENGES){
+    const r = document.createElement('div');
+    r.className = 'row' + (done.has(ch.id) ? ' done' : '');
+    r.innerHTML = `<div>
+        <div style="font-weight:700">${escapeHtml(ch.name || ch.id)}</div>
+        <small>${escapeHtml(ch.hint || '')}</small>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="pts">${done.has(ch.id) ? '&#10003; ' + ch.points : '+'+ch.points}</div>
+        <div style="min-width:70px;text-align:right"><small>${done.has(ch.id)?'solved':'open'}</small></div>
+      </div>`;
+    chList.appendChild(r);
+  }
+  renderHeader();
+}
+
+/* escape */
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+/* load flags.json; support both object format (your example) and array format */
+async function loadChallenges(){
+  try {
+    const res = await fetch(FLAGS_JSON, {cache:'no-cache'});
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+
+    let entries = [];
+    if (Array.isArray(data)){
+      // array of objects could have { id, name, hint, flag, points } or { name, hint, flag }
+      entries = data.map((it, i) => ({
+        id: String(it.id ?? it.name ?? ('f'+i)),
+        name: it.name ?? (it.id ?? ('flag_'+i)),
+        hint: it.hint ?? '',
+        flagRaw: String(it.flag ?? it.raw ?? ''),
+        points: Number(it.points ?? 5)
+      }));
+    } else if (data && typeof data === 'object'){
+      // object mapping keys -> {name, hint, flag}
+      entries = Object.keys(data).map(k => {
+        const it = data[k] || {};
+        return {
+          id: String(k),
+          name: it.name ?? k,
+          hint: it.hint ?? '',
+          flagRaw: String(it.flag ?? ''),
+          points: Number(it.points ?? 5)
+        };
+      });
+    } else {
+      throw new Error('invalid format');
+    }
+
+    // compute hashes (async)
+    const hashPromises = entries.map(async e => {
+      e.hash = await sha256hex(e.flagRaw || '');
+      // normalize hash to lowercase
+      e.hash = String(e.hash || '').toLowerCase();
+      // normalize id/name
+      e.id = String(e.id || '').trim();
+      e.name = String(e.name || e.id).trim();
+      return e;
+    });
+
+    CHALLENGES = await Promise.all(hashPromises);
+
+    message.textContent = 'Flags loaded successfully';
+  } catch (err){
+    // fallback demo (if no flags.json or parse error)
+    CHALLENGES = [
+      { id:'demo1', name:'demo1', hint:'demo hint', flagRaw:'MJS_FLAG{demo1}', points:5, hash: await sha256hex('MJS_FLAG{demo1}') },
+      { id:'demo2', name:'demo2', hint:'demo hint 2', flagRaw:'MJS_FLAG{demo2}', points:8, hash: await sha256hex('MJS_FLAG{demo2}') }
+    ];
+    message.textContent = 'FAILED TO LOAD FLAGS. Using demo flags (sucks)';
+  }
+  renderList();
+}
+
+async function checkFlag(){
+  const val = input.value.trim();
+  if (!val) return flash(input,'bad');
+  input.disabled = true;
+  checkBtn.disabled = true;
+  try {
+    const h = await sha256hex(val);
+    const matched = CHALLENGES.find(x => x.hash && x.hash.toLowerCase() === h.toLowerCase());
+    if (matched){
+      if (done.has(matched.id)){
+        indicate('already');
+        flash(input,'ok');
+      } else {
+        done.add(matched.id);
+        score += Number(matched.points || 0);
+        persist();
+        renderList();
+        indicate('ok');
+        flash(input,'ok');
+      }
+      input.value = '';
+    } else {
+      flash(input,'bad');
+      indicate('wrong');
+    }
+  } finally {
+    input.disabled = false;
+    checkBtn.disabled = false;
+  }
+}
+
+function flash(el, kind){
+  el.classList.remove('input-ok','input-bad');
+  if (kind === 'ok') el.classList.add('input-ok');
+  if (kind === 'bad') el.classList.add('input-bad');
+  setTimeout(()=> el.classList.remove('input-ok','input-bad'), 900);
+}
+
+let msgTimer = null;
+function indicate(type){
+  const prev = message.textContent;
+  let txt = '';
+  if (type === 'ok') txt = 'Correct - points added.';
+  else if (type === 'wrong') txt = 'Wrong flag.';
+  else if (type === 'already') txt = 'Already done.';
+  message.textContent = txt;
+  if (msgTimer) clearTimeout(msgTimer);
+  msgTimer = setTimeout(()=>{ message.textContent = prev; }, 1400);
+}
+
+function resetAll(){
+  if (!confirm('Reset progress? (Deletes flags in localStorage)?')) return;
+  done = new Set();
+  score = 0;
+  persist();
+  renderList();
+  message.textContent = 'Progress deleted.';
+}
+
+checkBtn.addEventListener('click', checkFlag);
+input.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); checkFlag(); }});
+resetBtn.addEventListener('click', (e)=>{ e.preventDefault(); resetAll(); });
+
+(async ()=>{
+  await loadChallenges();
+  persist();
+})();
+
+window.sha256hex = sha256hex;
+window._CHALLENGES = CHALLENGES;
+window._reloadFlags = loadChallenges;
+</script>
+</body>
+</html>
