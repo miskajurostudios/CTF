@@ -1,0 +1,12 @@
+{
+  "flag1": {
+    "name": "flaga 1",
+    "hint": "rada 1",
+    "flag": "MJS_FLAG{jo-bude-to-takhle-plain-text-idc}"
+  },
+  "flag2": {
+    "name": "flaga 2",
+    "hint": "tady dalsi hint",
+    "flag": "MJS_FLAG{druhy-flag}"
+  }
+}
