@@ -3,7 +3,7 @@ Those Sites are Created for Educational Purpuses only, and for CTF Challanges.
 None of shown websites are Working, or sending any data to 3rd party sites.
 
 ## Where/how to start
-Visit this main site: {work in progress}
+Visit this main site [here](https://miskajurostudios.github.io/CTF/sites/).
 Find your desired challange, try everything,
 Look at the Page Source, Javascripts, Webhooks, Hidden Elements, etc...
 Sites are located in 'sites/challange/(challange number)/'
