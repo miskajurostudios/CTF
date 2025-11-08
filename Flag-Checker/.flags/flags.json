@@ -8,5 +8,10 @@
     "name": "[02] Cicada3301 V2",
     "hint": "Inspect Image Metadata",
     "flag": "MJS_Flag{M3t4dA-taCid4-da33O1}"
+  },
+  "flag3": {
+    "name": "[03] Trashy Admin Check",
+    "hint": "Admin password is stored in plain text, somewhere.",
+    "flag": "MJS_Flag{tr4shy-adm1nL-0g1n:D}"
   }
 }
