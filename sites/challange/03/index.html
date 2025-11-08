@@ -1,1 +1,62 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <!-- [CTF] Settings & Imports, just Ignore. -->
+  <script defer src="https://miskajurostudios.github.io/CTF/sites/Functionality/THIS-IS-NOT-PART-OF-CTF-PLEASE-IGNORE.js"></script>
+  <!-- [CTF] END -->
 
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MiskaWiKi — Admin Login</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="brand">MiskaWiKi</h1>
+      <nav class="nav">
+        <a href="" class="nav-item">Home</a>
+        <a href="" class="nav-item">Pages</a>
+        <a href="" class="nav-item active">Admin</a>
+        <a href="" class="nav-item">Help</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main-grid">
+    <section class="card login-card">
+      <h2>Admin Login</h2>
+      <p class="muted">Enter administrator password to access the dashboard.</p>
+
+      <label for="pw" class="label">Password</label>
+      <div class="pw-row">
+        <input id="pw" type="password" placeholder="••••••••" autocomplete="off" />
+        <button id="submit" class="btn">Sign in</button>
+      </div>
+
+      <p id="hint" class="muted small">Tip: all checks are client-side.</p>
+
+      <div id="result" class="result" aria-live="polite"></div>
+    </section>
+
+    <aside class="card info-card">
+      <h3>Site Info</h3>
+      <p class="muted small">This is a static simulation for CTF use. No data leaves your browser.</p>
+      <ul>
+        <li>Client-side validation only</li>
+        <li>Separate auth logic in <code>auth.js</code></li>
+        <li>Flag revealed on correct password</li>
+      </ul>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© MiskaJuroStudios — MiskaWiKi | Admin Login</small>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
