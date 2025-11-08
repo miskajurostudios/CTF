@@ -13,5 +13,10 @@
     "name": "[03] Trashy Admin Check",
     "hint": "Admin password is stored in plain text, somewhere.",
     "flag": "MJS_Flag{tr4shy-adm1nL-0g1n:D}"
+  },
+  "flag4": {
+    "name": "[04] Wierd Login",
+    "hint": "Look at your Broswer Netork while authenticating.",
+    "flag": "MJS_Flag{N3tw0r-kT4B..-FL4G:)}"
   }
 }
